@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Oregon Trail Game</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        #game-container {
+            width: 80%;
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c6e49;
+        }
+
+        .game-text {
+            font-size: 18px;
+            margin: 15px 0;
+            line-height: 1.6;
+        }
+
+        .button {
+            padding: 10px 20px;
+            margin: 10px;
+            background-color: #2c6e49;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .button:hover {
+            background-color: #1e4f33;
+        }
+
+        .info {
+            margin-top: 20px;
+            font-size: 16px;
+            background-color: #e3f2fd;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #end-game {
+            display: none;
+            font-size: 24px;
+            color: #d32f2f;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        #restart {
+            display: block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #1e4f33;
+            color: white;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <h1>The Oregon Trail</h1>
+    <div id="game-text" class="game-text">
+        <p>You are embarking on a journey along the Oregon Trail. You need to make important decisions to survive the trip.</p>
+        <p>Let's get started!</p>
+    </div>
+
+    <!-- Action buttons for starting the journey -->
+    <div id="actions">
+        <button id="start-journey" class="button">Start Your Journey</button>
+    </div>
+
+    <!-- Journey Stats -->
+    <div id="journey-info" class="hidden info">
+        <p>Distance: 0 miles</p>
+        <p>Health: 100%</p>
+        <p>Food: 100 lbs</p>
+    </div>
+
+    <!-- Main Game Actions -->
+    <div id="journey" class="hidden">
+        <p class="game-text">What would you like to do next?</p>
+        <button id="travel" class="button">Travel 20 miles</button>
+        <button id="rest" class="button">Rest for the day</button>
+        <button id="hunt" class="button">Hunt for food</button>
+    </div>
+
+    <!-- Game Over -->
+    <div id="end-game" class="hidden">
+        <p>The journey has ended!</p>
+        <button id="restart" class="button">Restart the Game</button>
+    </div>
+</div>
+
+<script>
+    let health = 100;
+    let food = 100;
+    let distance = 0;
+    let journeyStarted = false;
+
+    const gameText = document.getElementById('game-text');
+    const actions = document.getElementById('actions');
+    const journey = document.getElementById('journey');
+    const journeyInfo = document.getElementById('journey-info');
+    const endGame = document.getElementById('end-game');
+    const restartButton = document.getElementById('restart');
+    const startJourneyButton = document.getElementById('start-journey');
+    const travelButton = document.getElementById('travel');
+    const restButton = document.getElementById('rest');
+    const huntButton = document.getElementById('hunt');
+
+    // Start the game
+    startJourneyButton.addEventListener('click', startJourney);
+    
+    function startJourney() {
+        journeyStarted = true;
+        actions.classList.add('hidden');
+        journey.classList.remove('hidden');
+        journeyInfo.classList.remove('hidden');
+        updateJourneyInfo();
+        gameText.innerHTML = "<p>Your journey along the Oregon Trail begins...</p><p>Choose wisely to survive.</p>";
+    }
+
+    // Handle the travel option
+    travelButton.addEventListener('click', () => {
+        if (food <= 0 || health <= 0) {
+            gameOver();
+        } else {
+            distance += 20;
+            food -= 10;
+            health -= 5;
+            updateJourneyInfo();
+            gameText.innerHTML = `<p>You travel 20 miles along the trail.</p>`;
+        }
+    });
+
+    // Handle the rest option
+    restButton.addEventListener('click', () => {
+        if (food <= 0 || health <= 0) {
+            gameOver();
+        } else {
+            health += 10;
+            food -= 5;
+            updateJourneyInfo();
+            gameText.innerHTML = "<p>You rest for the day and regain some health, but lose some food.</p>";
+        }
+    });
+
+    // Handle the hunt option
+    huntButton.addEventListener('click', () => {
+        if (food <= 0 || health <= 0) {
+            gameOver();
+        } else {
+            food += 20;
+            health -= 5;
+            updateJourneyInfo();
+            gameText.innerHTML = "<p>You hunt for food and gain 20 lbs of food, but lose some health.</p>";
+        }
+    });
+
+    // Game over function
+    function gameOver() {
+        gameText.innerHTML = "<p>Your journey has ended. You ran out of food or health!</p>";
+        journey.classList.add('hidden');
+        endGame.classList.remove('hidden');
+    }
+
+    // Update journey info (distance, health, food)
+    function updateJourneyInfo() {
+        journeyInfo.innerHTML = `
+            <p>Distance: ${distance} miles</p>
+            <p>Health: ${health}%</p>
+            <p>Food: ${food} lbs</p>
+        `;
+
+        // Check if journey is over
+        if (health <= 0 || food <= 0 || distance >= 500) {
+            gameOver();
+        }
+    }
+
+    // Restart the game
+    restartButton.addEventListener('click', () => {
+        health = 100;
+        food = 100;
+        distance = 0;
+        journeyStarted = false;
+        journey.classList.add('hidden');
+        endGame.classList.add('hidden');
+        actions.classList.remove('hidden');
+        gameText.innerHTML = "<p>Welcome to The Oregon Trail. Are you ready for the journey?</p><p>Click 'Start Your Journey' to begin!</p>";
+    });
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
